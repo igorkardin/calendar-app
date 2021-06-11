@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Calendar</string>
+    <string name="task_item_name">%s at %s</string>
+</resources>

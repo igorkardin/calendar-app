@@ -2,7 +2,6 @@ package com.igor.calendar.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.asLiveData
 import com.igor.calendar.data.TasksRepository
 import com.igor.calendar.ui.dto.Task
 import kotlinx.coroutines.Dispatchers

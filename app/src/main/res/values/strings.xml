@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Calendar</string>
     <string name="task_item_name">%s at %s</string>
+    <string name="time">Время:</string>
+    <string name="description">Описание:</string>
+    <string name="date_from_to">%s – %s</string>
 </resources>

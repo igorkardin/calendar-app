@@ -4,13 +4,14 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.lifecycle.lifecycleScope
 import com.igor.calendar.App
 import com.igor.calendar.R
 import com.igor.calendar.databinding.MainActivityBinding
 import com.igor.calendar.presentation.MainActivityViewModel
+import com.igor.calendar.ui.dto.Task
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import java.time.LocalDate
+import kotlinx.coroutines.flow.collect
 
 @ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity() {
@@ -19,17 +20,24 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        binding.calendar.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            viewModel.onDatePick(LocalDate.of(year, month, dayOfMonth))
+        lifecycleScope.launchWhenResumed { viewModel.selectedTask.collect { navigate(it) } }
+    }
+
+    private fun navigate(task: Task?) {
+        val fragment = task?.let { DetailsFragment() } ?: run { CalendarFragment() }
+        binding.toolbar.setNavigationOnClickListener { onBackPressed() }
+        binding.toolbar.navigationIcon = task?.let { ContextCompat.getDrawable(this, R.drawable.ic_baseline_arrow_back_24) }
+        val previousFragment = supportFragmentManager.findFragmentById(binding.fragmentContainer.id)
+        supportFragmentManager.apply {
+            beginTransaction().apply {
+                previousFragment?.let { replace(binding.fragmentContainer.id, fragment) }
+                    ?: run { add(binding.fragmentContainer.id, fragment) }
+            }.commit()
         }
-        val adapter = TasksAdapter()
-        val dividerItemDecoration = DividerItemDecoration(this, DividerItemDecoration.VERTICAL).apply {
-            ContextCompat.getDrawable(this@MainActivity, R.drawable.task_items_divider)?.let { setDrawable(it) }
-        }
-        binding.tasks.addItemDecoration(dividerItemDecoration)
-        binding.tasks.adapter = adapter
-        viewModel.tasks.observe(this) { tasks ->
-            adapter.setItems(tasks)
-        }
+    }
+
+
+    override fun onBackPressed() {
+        viewModel.selectedTask.value?.let { viewModel.selectTask(null) } ?: run { super.onBackPressed() }
     }
 }

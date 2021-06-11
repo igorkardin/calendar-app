@@ -3,27 +3,30 @@ package com.igor.calendar.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
-import com.igor.calendar.TasksRepository
+import com.igor.calendar.data.TasksRepository
 import com.igor.calendar.ui.dto.Task
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import java.time.LocalDate
 
 @ExperimentalCoroutinesApi
 class MainActivityViewModel(private val tasksRepository: TasksRepository) : ViewModel() {
-    val tasks
-        get() = dateStateFlow.flatMapLatest { date ->
-            date?.let { tasksRepository.getTasks() }
-                ?: flow { emptyList<Task>() }
-        }
-            .flowOn(Dispatchers.IO)
-            .asLiveData()
+    val selectedTask: StateFlow<Task?> get() = selectedTaskFlow
+    private val selectedTaskFlow = MutableStateFlow<Task?>(null)
 
-    private val dateStateFlow = MutableStateFlow<LocalDate?>(null)
+    val tasks
+        get() = dateStateFlow.flatMapLatest { tasksRepository.getTasks(it) }
+            .flowOn(Dispatchers.IO)
+
+    private val dateStateFlow = MutableStateFlow<LocalDate>(LocalDate.now())
+
+    fun selectTask(task: Task?) {
+        selectedTaskFlow.value = task
+    }
 
     fun onDatePick(date: LocalDate) {
         dateStateFlow.value = date

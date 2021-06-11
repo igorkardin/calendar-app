@@ -1,6 +1,7 @@
 package com.igor.calendar
 
 import android.app.Application
+import com.igor.calendar.data.TasksRepository
 import com.igor.calendar.presentation.MainActivityViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
